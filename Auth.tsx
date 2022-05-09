@@ -31,7 +31,7 @@ export default function Auth() {
       }
 
       return (
-        <View>
+        <View style={styles.container}>
             <View style={[styles.verticallySpaced, styles.mt20]}>
                 <Input
                       label="Email"
@@ -39,7 +39,8 @@ export default function Auth() {
                       onChangeText={(text) => setEmail(text)}
                       value={email}
                       placeholder="email@address.com"
-                      autoCapitalize={'none'} autoCompleteType={undefined}                />
+                      autoCapitalize={'none'}
+                      autoCompleteType={undefined}/>
             </View>
             <View style={styles.verticallySpaced}>
                 <Input
@@ -49,13 +50,14 @@ export default function Auth() {
                       value={password}
                       secureTextEntry={true}
                       placeholder="Password"
-                      autoCapitalize={'none'} autoCompleteType={undefined}                />
+                      autoCapitalize={'none'}
+                      autoCompleteType={undefined}/>
             </View>
             <View style={[styles.verticallySpaced, styles.mt20]}>
-                <Button title="Sign in" disabled={loading} onPress={() => signInWithEmail()} />
+                <Button title="Sign in" disabled={loading} onPress={() => signInWithEmail()}/>
             </View>
             <View style={styles.verticallySpaced}>
-                <Button title="Sign up" disabled={loading} onPress={() => signUpWithEmail()} />
+                <Button title="Sign up" disabled={loading} onPress={() => signUpWithEmail()}/>
             </View>
         </View>
       );
@@ -63,8 +65,7 @@ export default function Auth() {
 
 const styles = StyleSheet.create({
     container: {
-        marginTop: 40,
-        padding: 12,
+        width: "80%"
       },
       verticallySpaced: {
         paddingTop: 4,
