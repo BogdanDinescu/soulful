@@ -14,9 +14,11 @@ export default function Auth() {
           email: email,
           password: password,
         })
-    
-        if (error) Alert.alert(error.message)
-        setLoading(false)
+        
+        if (error) {
+          Alert.alert("Sign in failed", error.message);
+          setLoading(false)
+        }
       }
     
       async function signUpWithEmail() {
@@ -26,7 +28,7 @@ export default function Auth() {
           password: password,
         })
     
-        if (error) Alert.alert(error.message)
+        if (error) Alert.alert("Sign up failed",error.message)
         setLoading(false)
       }
 

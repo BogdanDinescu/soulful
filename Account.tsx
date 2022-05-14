@@ -1,24 +1,29 @@
 import { ApiError, Session } from "@supabase/supabase-js";
 import React, { useEffect, useState } from "react";
-import { Alert, Button, StyleSheet, View } from "react-native";
+import { Alert, Button, Image, StyleSheet, Text, View } from "react-native";
 import { Input } from "react-native-elements";
 import { supabase } from "./supabase";
-
-
+import * as ImagePicker from 'expo-image-picker';
+import {decode} from 'base64-arraybuffer'
+import PhotoCarousel from "./PhotoCarousel";
 
 export default function Account({session}: {session: Session}) {
     const [loading, setLoading] = useState(false);
-    const [username, setUsername] = useState("");
-    const [website, setWebsite] = useState("");
-    const [avatar_url, setAvatarUrl] = useState("");
-
+    const [name, setName] = useState("");
+    const [bio, setBio] = useState("");
+    const [photos, setPhotos] = useState<string[]>([]);
+    
     useEffect(() => {
-        if(session) getProfile();
-    });
+        if(session) {
+            //getProfile();
+            downloadPhotos();
+        }
+    }, [session]);
 
     async function getProfile() {
         try {
             setLoading(true);
+            console.log("getProfile")
             const user = supabase.auth.user();
             if (!user) {
                 throw new Error("No user");
@@ -26,7 +31,7 @@ export default function Account({session}: {session: Session}) {
 
             let {data, error, status} = await supabase
                 .from("profiles")
-                .select(`username, website, avatar_url`)
+                .select(`name, bio`)
                 .eq("id", user.id)
                 .single();
 
@@ -35,9 +40,8 @@ export default function Account({session}: {session: Session}) {
             }
 
             if (data) {
-                setUsername(data.username);
-                setWebsite(data.website);
-                setAvatarUrl(data.website);
+                setName(data.username);
+                setBio(data.website);
             }
         } catch (error) {
             Alert.alert((error as ApiError).message);
@@ -46,7 +50,7 @@ export default function Account({session}: {session: Session}) {
         }
     }
 
-    async function updateProfile({username, website, avatar_url}: {username: string, website: string, avatar_url: string}) {
+    async function updateProfile({name, bio}: {name: string, bio: string}) {
         try {
             setLoading(true);
             const user = supabase.auth.user();
@@ -56,9 +60,8 @@ export default function Account({session}: {session: Session}) {
 
             const updates = {
                 id: user.id,
-                username,
-                website,
-                avatar_url,
+                name,
+                bio,
                 updated_at: new Date(),
             };
 
@@ -76,29 +79,93 @@ export default function Account({session}: {session: Session}) {
         }
     }
 
+    async function selectPhotos() {
+        const options:ImagePicker.ImagePickerOptions = {
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            base64: true
+        };
+        return ImagePicker.launchImageLibraryAsync(options);
+    }
+
+    async function uploadPhotos() {
+        try {
+            const photo = await selectPhotos();
+            if (photo.cancelled) {
+                return;
+            }
+            const user = supabase.auth.user();
+            if (!user) {
+                throw new Error("No user");
+            }
+            const path: string = `pictures/${user.id}`;
+            const fileExt = photo.uri.split('.').pop();
+            const filePath: string = `${Math.random()}.${fileExt}`;
+            if (photo.base64) {
+                await supabase.storage.from(path).upload(filePath, decode(photo.base64), {
+                    contentType: `image/${fileExt}`
+                });
+            } else {
+                throw new Error("Image cannod be read");
+            }
+        } catch (error: any) {
+            Alert.alert("Uploading failed", error.message);
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    async function downloadPhotos() {
+        try {
+            const user = supabase.auth.user();
+            if (!user) {
+                throw new Error("No user");
+            }
+            const {data, error} = await supabase.storage.from("pictures").list(user.id);
+            if (data && Array.isArray(data)) {
+                const fileNames = data
+                    .filter(f => !f.name.startsWith("."))
+                    .map(f => f.name);
+                setPhotos(fileNames);
+            } else {
+                throw new Error("Error downloading images")
+            }
+        } catch (error: any) {
+            Alert.alert("Error downloading images", error)
+        }
+    }
+
     return(
-        <View>
+        <View style={styles.container}>
+            <Text style={{fontWeight: "bold", fontSize: 20, textAlign: "center"}}>
+                My Profile
+            </Text>
+            <PhotoCarousel photosUrls={photos}/>
+            <View>
+                <Button title="Upload Photos" onPress={() => uploadPhotos()} />
+            </View>
             <View style={[styles.verticallySpaced, styles.mt20]}>
                 <Input label="Email" value={session?.user?.email} autoCompleteType={undefined} disabled/>
             </View>
             <View style={styles.verticallySpaced}>
                 <Input
-                    label="Username"
-                    value={username || ""}
-                    onChangeText={(text) => setUsername(text)}
+                    label="Name"
+                    value={name || ""}
+                    onChangeText={(text) => setName(text)}
                     autoCompleteType={undefined}/>
             </View>
             <View style={styles.verticallySpaced}>
                 <Input
-                    label="Website"
-                    value={website || ""}
-                    onChangeText={(text) => setWebsite(text)}
+                    label="Bio"
+                    value={bio || ""}
+                    multiline = {true}
+                    numberOfLines={3}
+                    onChangeText={(text) => setBio(text)}
                     autoCompleteType={undefined}/>
             </View>
             <View style={[styles.verticallySpaced, styles.mt20]}>
                 <Button
                 title={loading ? "Loading ..." : "Update"}
-                onPress={() => updateProfile({ username, website, avatar_url })}
+                onPress={() => updateProfile({ name: name, bio: bio })}
                 disabled={loading}
                 />
             </View>
@@ -112,8 +179,7 @@ export default function Account({session}: {session: Session}) {
 
 const styles = StyleSheet.create({
     container: {
-      marginTop: 40,
-      padding: 12,
+      width: "80%"
     },
     verticallySpaced: {
       paddingTop: 4,
