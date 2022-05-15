@@ -11,7 +11,7 @@ export default function Account({session}: {session: Session}) {
     const [loading, setLoading] = useState(false);
     const [name, setName] = useState("");
     const [bio, setBio] = useState("");
-    const [photos, setPhotos] = useState<string[]>([]);
+    const [photos, setPhotos] = useState<string[]>(["", "", ""]);
     
     useEffect(() => {
         if(session) {
@@ -68,7 +68,7 @@ export default function Account({session}: {session: Session}) {
             const {error} = await supabase
                 .from("profiles")
                 .upsert(updates, {returning: "minimal"});
-                
+
             if (error) {
                 throw error;
             }
@@ -121,14 +121,18 @@ export default function Account({session}: {session: Session}) {
                 throw new Error("No user");
             }
             const path: string = `pictures/${user.id}`;
+            const array:Array<string> = [];
+            for (let i = 0; i < 3; i++) {
+                array.push(`${user.id}/picture${i}.jpg`)
+            }
             const {data, error} = await supabase.storage
                 .from("pictures")
-                .createSignedUrl(`${user.id}/picture1.jpg`, 60);
+                .createSignedUrls(array, 60);
             if (error) {
                 throw error;
             }
             if (data) {
-                setPhotos([...photos, data.signedURL]);
+                setPhotos( data.map(x => x.signedURL?x.signedURL:""));
             }
 
         } catch (error: any) {
