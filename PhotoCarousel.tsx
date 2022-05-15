@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { Image } from 'react-native-elements';
+import React, { useEffect, useRef, useState } from 'react';
+import { Image, StyleSheet, Text, View } from 'react-native';
 import Carousel from 'react-native-snap-carousel';
 
 export default function PhotoCarousel({photosUrls}: {photosUrls: Array<string>}) {
@@ -9,22 +8,24 @@ export default function PhotoCarousel({photosUrls}: {photosUrls: Array<string>})
         return (
             <View>
                 <Image
-                    source={{ uri: item[index] }}
-                    width={400} height={400}
+                    source={{uri: item}}
+                    style={{width:300, height:300}}
                     />
             </View>
         )
     }
 
+    const isCarousel = useRef(null);
+
     return (
         <View>
             <Carousel
                 layout={'default'}
-                //ref={(c) => this.carousel = c}
+                ref={isCarousel}
                 data={photosUrls}
                 renderItem={renderItem}
-                sliderWidth={400}
-                itemWidth={400}
+                sliderWidth={300}
+                itemWidth={300}
             />
         </View>
     );

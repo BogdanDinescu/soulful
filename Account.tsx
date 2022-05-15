@@ -60,20 +60,20 @@ export default function Account({session}: {session: Session}) {
 
             const updates = {
                 id: user.id,
-                name,
-                bio,
+                name: name,
+                bio: bio,
                 updated_at: new Date(),
             };
 
-            let {error} = await supabase
+            const {error} = await supabase
                 .from("profiles")
                 .upsert(updates, {returning: "minimal"});
-
+                
             if (error) {
                 throw error;
             }
-        } catch (error) {
-            Alert.alert((error as ApiError).message);
+        } catch (error: any) {
+            Alert.alert("Update profile failed", error.message);
         } finally {
             setLoading(false);
         }
@@ -120,17 +120,19 @@ export default function Account({session}: {session: Session}) {
             if (!user) {
                 throw new Error("No user");
             }
-            const {data, error} = await supabase.storage.from("pictures").list(user.id);
-            if (data && Array.isArray(data)) {
-                const fileNames = data
-                    .filter(f => !f.name.startsWith("."))
-                    .map(f => f.name);
-                setPhotos(fileNames);
-            } else {
-                throw new Error("Error downloading images")
+            const path: string = `pictures/${user.id}`;
+            const {data, error} = await supabase.storage
+                .from("pictures")
+                .createSignedUrl(`${user.id}/picture1.jpg`, 60);
+            if (error) {
+                throw error;
             }
+            if (data) {
+                setPhotos([...photos, data.signedURL]);
+            }
+
         } catch (error: any) {
-            Alert.alert("Error downloading images", error)
+            Alert.alert("Error downloading images", error.message)
         }
     }
 
