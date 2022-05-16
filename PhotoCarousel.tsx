@@ -1,17 +1,24 @@
 import { FontAwesome } from '@expo/vector-icons';
 import React, { useEffect, useRef, useState } from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { Image, Alert, StyleSheet, Text, View } from 'react-native';
 import Carousel from 'react-native-snap-carousel';
 
-export default function PhotoCarousel({photosUrls}: {photosUrls: Array<string>}) {
+export default function PhotoCarousel({photosUrls, uploadPhoto}: {photosUrls: Array<string>, uploadPhoto: Function}) {
     
     const renderItem = ({item, index}: {item: any, index: number}) => {
         if (item === "") {
             return (
-                <View style={{display: 'flex', alignItems:"center", paddingTop: 100}}>
+                <View style={{
+                    display: 'flex', 
+                    alignItems:"center",
+                    paddingTop: 100,
+                    width:300,
+                    height:300
+                    }}>
                     <FontAwesome.Button 
                         name="plus"
-                        style={{height: 50}}>
+                        style={{height: 50}}
+                        onPress={() => uploadPhoto(index)}>
                         Add image
                     </FontAwesome.Button>
               </View>

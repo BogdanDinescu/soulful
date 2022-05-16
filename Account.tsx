@@ -1,18 +1,20 @@
 import { ApiError, Session } from "@supabase/supabase-js";
 import React, { useEffect, useState } from "react";
-import { Alert, Button, Image, StyleSheet, Text, View } from "react-native";
+import { Alert, Button, Image, StyleSheet, Text, Touchable, TouchableOpacity, View } from "react-native";
 import { Input } from "react-native-elements";
 import { supabase } from "./supabase";
 import * as ImagePicker from 'expo-image-picker';
 import {decode} from 'base64-arraybuffer'
 import PhotoCarousel from "./PhotoCarousel";
+import { FontAwesome } from "@expo/vector-icons";
 
 export default function Account({session}: {session: Session}) {
     const [loading, setLoading] = useState(false);
     const [name, setName] = useState("");
     const [bio, setBio] = useState("");
     const [photos, setPhotos] = useState<string[]>(["", "", ""]);
-    
+    const nummberOfPhotos:number = 3;
+
     useEffect(() => {
         if(session) {
             //getProfile();
@@ -87,8 +89,9 @@ export default function Account({session}: {session: Session}) {
         return ImagePicker.launchImageLibraryAsync(options);
     }
 
-    async function uploadPhotos() {
+    async function uploadPhoto(number: number) {
         try {
+            setLoading(true);
             const photo = await selectPhotos();
             if (photo.cancelled) {
                 return;
@@ -99,11 +102,12 @@ export default function Account({session}: {session: Session}) {
             }
             const path: string = `pictures/${user.id}`;
             const fileExt = photo.uri.split('.').pop();
-            const filePath: string = `${Math.random()}.${fileExt}`;
+            const filePath: string = `picture${number}.${fileExt}`;
             if (photo.base64) {
                 await supabase.storage.from(path).upload(filePath, decode(photo.base64), {
                     contentType: `image/${fileExt}`
                 });
+                downloadPhotos()
             } else {
                 throw new Error("Image cannod be read");
             }
@@ -122,7 +126,7 @@ export default function Account({session}: {session: Session}) {
             }
             const path: string = `pictures/${user.id}`;
             const array:Array<string> = [];
-            for (let i = 0; i < 3; i++) {
+            for (let i = 0; i < nummberOfPhotos; i++) {
                 array.push(`${user.id}/picture${i}.jpg`)
             }
             const {data, error} = await supabase.storage
@@ -132,7 +136,11 @@ export default function Account({session}: {session: Session}) {
                 throw error;
             }
             if (data) {
-                setPhotos( data.map(x => x.signedURL?x.signedURL:""));
+                const photoUrls = data.map(x => x.signedURL).filter(x => x);
+                if (photoUrls.length < nummberOfPhotos) {
+                    photoUrls.push("")
+                }
+                setPhotos(photoUrls);
             }
 
         } catch (error: any) {
@@ -145,10 +153,7 @@ export default function Account({session}: {session: Session}) {
             <Text style={{fontWeight: "bold", fontSize: 20, textAlign: "center"}}>
                 My Profile
             </Text>
-            <PhotoCarousel photosUrls={photos}/>
-            <View>
-                <Button title="Upload Photos" onPress={() => uploadPhotos()} />
-            </View>
+            <PhotoCarousel photosUrls={photos} uploadPhoto={uploadPhoto}/>
             <View style={[styles.verticallySpaced, styles.mt20]}>
                 <Input label="Email" value={session?.user?.email} autoCompleteType={undefined} disabled/>
             </View>
