@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Image, Alert, StyleSheet, Text, View } from 'react-native';
 import Carousel from 'react-native-snap-carousel';
 
-export default function PhotoCarousel({photosUrls, uploadPhoto}: {photosUrls: Array<string>, uploadPhoto: Function}) {
+export default function PhotoCarousel({photosUrls, uploadPhoto}: {photosUrls: Array<string>, uploadPhoto?: Function}) {
     
     const renderItem = ({item, index}: {item: any, index: number}) => {
         if (item === "") {
@@ -18,7 +18,11 @@ export default function PhotoCarousel({photosUrls, uploadPhoto}: {photosUrls: Ar
                     <FontAwesome.Button 
                         name="plus"
                         style={{height: 50}}
-                        onPress={() => uploadPhoto(index)}>
+                        onPress={() => {
+                            if (typeof uploadPhoto !== 'undefined') {
+                                uploadPhoto(index)
+                            }
+                        }}>
                         Add image
                     </FontAwesome.Button>
               </View>

@@ -1,19 +1,17 @@
 import { ApiError, Session } from "@supabase/supabase-js";
 import React, { useEffect, useState } from "react";
-import { Alert, Button, Image, StyleSheet, Text, Touchable, TouchableOpacity, View } from "react-native";
+import { Alert, Button, StyleSheet, Text, View } from "react-native";
 import { Input } from "react-native-elements";
-import { supabase } from "./supabase";
+import { maxNumberOfPhotos, supabase } from "./supabase";
 import * as ImagePicker from 'expo-image-picker';
 import {decode} from 'base64-arraybuffer'
 import PhotoCarousel from "./PhotoCarousel";
-import { FontAwesome } from "@expo/vector-icons";
 
-export default function Account({session}: {session: Session}) {
+export default function Account({session, navigation}: {session: Session, navigation: any}) {
     const [loading, setLoading] = useState(false);
     const [name, setName] = useState("");
     const [bio, setBio] = useState("");
     const [photos, setPhotos] = useState<string[]>(["", "", ""]);
-    const nummberOfPhotos:number = 3;
 
     useEffect(() => {
         if(session) {
@@ -126,7 +124,7 @@ export default function Account({session}: {session: Session}) {
             }
             const path: string = `pictures/${user.id}`;
             const array:Array<string> = [];
-            for (let i = 0; i < nummberOfPhotos; i++) {
+            for (let i = 0; i < maxNumberOfPhotos; i++) {
                 array.push(`${user.id}/picture${i}.jpg`)
             }
             const {data, error} = await supabase.storage
@@ -137,7 +135,7 @@ export default function Account({session}: {session: Session}) {
             }
             if (data) {
                 const photoUrls = data.map(x => x.signedURL).filter(x => x);
-                if (photoUrls.length < nummberOfPhotos) {
+                if (photoUrls.length < maxNumberOfPhotos) {
                     photoUrls.push("")
                 }
                 setPhotos(photoUrls);
@@ -153,6 +151,12 @@ export default function Account({session}: {session: Session}) {
             <Text style={{fontWeight: "bold", fontSize: 20, textAlign: "center"}}>
                 My Profile
             </Text>
+            <Button
+                title="Preview"
+                onPress={() =>
+                    navigation.navigate('Profile', { id: session?.user?.id })
+                }
+            />
             <PhotoCarousel photosUrls={photos} uploadPhoto={uploadPhoto}/>
             <View style={[styles.verticallySpaced, styles.mt20]}>
                 <Input label="Email" value={session?.user?.email} autoCompleteType={undefined} disabled/>
