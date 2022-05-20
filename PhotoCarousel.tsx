@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Image, Alert, StyleSheet, Text, View } from 'react-native';
 import Carousel from 'react-native-snap-carousel';
 
-export default function PhotoCarousel({photosUrls, uploadPhoto}: {photosUrls: Array<string>, uploadPhoto?: Function}) {
+export default function PhotoCarousel({photosUrls, uploadPhoto, removePhoto}: {photosUrls: Array<string>, uploadPhoto?: Function, removePhoto?: Function}) {
     
     const renderItem = ({item, index}: {item: any, index: number}) => {
         if (item === "") {
@@ -30,6 +30,18 @@ export default function PhotoCarousel({photosUrls, uploadPhoto}: {photosUrls: Ar
         } else {
             return (
                 <View>
+                    <FontAwesome.Button
+                            name='remove'
+                            style={{backgroundColor: "darkred"}}
+                            onPress={
+                                () => {
+                                    if (typeof removePhoto !== 'undefined') {
+                                        removePhoto(index)
+                                    }
+                                }
+                            }>
+                            Remove this image
+                    </FontAwesome.Button>
                     <Image
                         source={{uri: item}}
                         style={{width:300, height:300}}

@@ -118,6 +118,32 @@ export default function Account({navigation, route}: {navigation: any, route: an
         }
     }
 
+    async function removePhoto(number: number) {
+        try {
+            setLoading(true);
+            if (!user) {
+                throw new Error("No user");
+            }
+            const path: string = `pictures`;
+            const fileExt: string = 'jpg';
+            const filePath: string = `${user.id}/picture${number}.${fileExt}`;
+            const { data, error } = await supabase.storage.from(path).remove([filePath]);
+            if (error) {
+                throw error;
+            }
+            for (let i = number + 1; i < maxNumberOfPhotos; i++) {
+                const oldPath: string = `${user.id}/picture${i}.${fileExt}`;
+                const newPath: string = `${user.id}/picture${i-1}.${fileExt}`;
+                await supabase.storage.from(path).move(oldPath, newPath);
+            }
+            downloadPhotos();
+        } catch (error: any) {
+            Alert.alert("Deleting failed", error.message);
+        } finally {
+            setLoading(false);
+        }
+    }
+
     async function downloadPhotos() {
         try {
             if (!user) {
@@ -158,7 +184,7 @@ export default function Account({navigation, route}: {navigation: any, route: an
                     navigation.navigate('Profile', {id: user?.id})
                 }
             />
-            <PhotoCarousel photosUrls={photos} uploadPhoto={uploadPhoto}/>
+            <PhotoCarousel photosUrls={photos} uploadPhoto={uploadPhoto} removePhoto={removePhoto}/>
             <View style={[styles.verticallySpaced, styles.mt20]}>
                 <Input label="Email" value={user?.email} autoCompleteType={undefined} disabled/>
             </View>
