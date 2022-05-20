@@ -1,30 +1,34 @@
-import { ApiError, Session } from "@supabase/supabase-js";
+import { ApiError, Session, User } from "@supabase/supabase-js";
 import React, { useEffect, useState } from "react";
-import { Alert, Button, StyleSheet, Text, View } from "react-native";
+import { Alert, Button, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Input } from "react-native-elements";
 import { maxNumberOfPhotos, supabase } from "./supabase";
 import * as ImagePicker from 'expo-image-picker';
 import {decode} from 'base64-arraybuffer'
 import PhotoCarousel from "./PhotoCarousel";
 
-export default function Account({session, navigation}: {session: Session, navigation: any}) {
+export default function Account({navigation, route}: {navigation: any, route: any}) {
     const [loading, setLoading] = useState(false);
+    const [user, setUser] = useState<User|null>(null);
     const [name, setName] = useState("");
     const [bio, setBio] = useState("");
     const [photos, setPhotos] = useState<string[]>(["", "", ""]);
 
     useEffect(() => {
-        if(session) {
-            //getProfile();
-            downloadPhotos();
+        const session: Session = route.params.session;
+        if (session) {
+            setUser(session.user);
+            if (user) {
+                //getProfile();
+                downloadPhotos();
+            }
         }
-    }, [session]);
+    }, [user]);
 
     async function getProfile() {
         try {
             setLoading(true);
             console.log("getProfile")
-            const user = supabase.auth.user();
             if (!user) {
                 throw new Error("No user");
             }
@@ -53,7 +57,6 @@ export default function Account({session, navigation}: {session: Session, naviga
     async function updateProfile({name, bio}: {name: string, bio: string}) {
         try {
             setLoading(true);
-            const user = supabase.auth.user();
             if (!user) {
                 throw new Error("No user");
             }
@@ -94,7 +97,6 @@ export default function Account({session, navigation}: {session: Session, naviga
             if (photo.cancelled) {
                 return;
             }
-            const user = supabase.auth.user();
             if (!user) {
                 throw new Error("No user");
             }
@@ -118,7 +120,6 @@ export default function Account({session, navigation}: {session: Session, naviga
 
     async function downloadPhotos() {
         try {
-            const user = supabase.auth.user();
             if (!user) {
                 throw new Error("No user");
             }
@@ -147,19 +148,19 @@ export default function Account({session, navigation}: {session: Session, naviga
     }
 
     return(
-        <View style={styles.container}>
+        <ScrollView style={styles.container}>
             <Text style={{fontWeight: "bold", fontSize: 20, textAlign: "center"}}>
                 My Profile
             </Text>
             <Button
                 title="Preview"
                 onPress={() =>
-                    navigation.navigate('Profile', { id: session?.user?.id })
+                    navigation.navigate('Profile', {id: user?.id})
                 }
             />
             <PhotoCarousel photosUrls={photos} uploadPhoto={uploadPhoto}/>
             <View style={[styles.verticallySpaced, styles.mt20]}>
-                <Input label="Email" value={session?.user?.email} autoCompleteType={undefined} disabled/>
+                <Input label="Email" value={user?.email} autoCompleteType={undefined} disabled/>
             </View>
             <View style={styles.verticallySpaced}>
                 <Input
@@ -188,13 +189,13 @@ export default function Account({session, navigation}: {session: Session, naviga
             <View style={styles.verticallySpaced}>
                 <Button title="Sign Out" onPress={() => supabase.auth.signOut()} />
             </View>
-        </View>
+        </ScrollView>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
-      width: "80%"
+      
     },
     verticallySpaced: {
       paddingTop: 4,
