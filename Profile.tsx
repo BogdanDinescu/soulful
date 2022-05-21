@@ -4,20 +4,19 @@ import React, { useEffect, useState } from "react";
 import { Alert, View, ActivityIndicator} from "react-native";
 import { Text } from "react-native-elements";
 
-export default function Profile({navigation, route, userId}: {navigation:any, route:any, userId:string|null}) {
+export default function Profile({navigation, route}: {navigation:any, route:any}) {
     const [photos, setPhotos] = useState<string[]>(["", "", ""]);
     const [profile, setProfile] = useState<any>({});
     const [loading, setLoading] = useState<boolean>(true);
+    const [userId, setUserId] = useState<string|null>(null);
 
     useEffect(() => {
-        userId = route.params.id;
+        setUserId(route.params.id);
         if (userId != null) {
             downloadPhotos(userId);
             downloadProfile(userId);
-        } else {
-            Alert.alert("Error", "User does not exist")
         }
-    }, [])
+    }, [userId])
 
 
     async function downloadPhotos(id: string) {

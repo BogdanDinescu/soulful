@@ -5,6 +5,7 @@ import { Input } from "react-native-elements";
 import { maxNumberOfPhotos, supabase } from "./supabase";
 import * as ImagePicker from 'expo-image-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import {Picker} from '@react-native-picker/picker';
 import {decode} from 'base64-arraybuffer'
 import PhotoCarousel from "./PhotoCarousel";
 
@@ -13,7 +14,8 @@ export default function Account({navigation, route}: {navigation: any, route: an
     const [user, setUser] = useState<User|null>(null);
     const [name, setName] = useState("");
     const [bio, setBio] = useState("");
-    const [birthday, setBirthday] = useState<Date>(new Date(new Date().setFullYear(new Date().getFullYear() - 18)))
+    const [birthday, setBirthday] = useState<Date>(new Date(new Date().setFullYear(new Date().getFullYear() - 18)));
+    const [sex, setSex] = useState<string>("");
     const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
     const [photos, setPhotos] = useState<string[]>(["", "", ""]);
 
@@ -38,7 +40,7 @@ export default function Account({navigation, route}: {navigation: any, route: an
 
             let {data, error, status} = await supabase
                 .from("profiles")
-                .select('name, bio, birthday')
+                .select('name, bio, birthday, sex')
                 .eq("id", user.id)
                 .single();
 
@@ -57,7 +59,7 @@ export default function Account({navigation, route}: {navigation: any, route: an
         }
     }
 
-    async function updateProfile({name, bio}: {name: string, bio: string}) {
+    async function updateProfile() {
         try {
             setLoading(true);
             if (!user) {
@@ -69,6 +71,7 @@ export default function Account({navigation, route}: {navigation: any, route: an
                 name: name,
                 bio: bio,
                 birthday: birthday,
+                sex: sex,
                 updated_at: new Date(),
             };
 
@@ -189,24 +192,23 @@ export default function Account({navigation, route}: {navigation: any, route: an
                 }
             />
             <PhotoCarousel photosUrls={photos} uploadPhoto={uploadPhoto} removePhoto={removePhoto}/>
-            <View style={[styles.verticallySpaced, styles.mt20]}>
+            <View style={styles.mt20}>
                 <Input label="Email" value={user?.email} autoCompleteType={undefined} disabled/>
             </View>
-            <View style={styles.verticallySpaced}>
+            <View>
                 <Input
                     label="Name"
                     value={name || ""}
                     onChangeText={(text) => setName(text)}
                     autoCompleteType={undefined}/>
             </View>
-            <View style={styles.verticallySpaced}>
-                <Input
-                    label="Bio"
-                    value={bio || ""}
-                    multiline = {true}
-                    numberOfLines={3}
-                    onChangeText={(text) => setBio(text)}
-                    autoCompleteType={undefined}/>
+            <View>
+                <Picker
+                    selectedValue={sex}
+                    onValueChange={(value:string, index:number)=> {setSex(value)}}>
+                    <Picker.Item label="Male" value="M" />
+                    <Picker.Item label="Female" value="F" />
+                </Picker>
             </View>
             <View>
                 <TouchableOpacity
@@ -230,15 +232,23 @@ export default function Account({navigation, route}: {navigation: any, route: an
                     }}
                 />)}
             </View>
-            <View style={[styles.verticallySpaced, styles.mt20]}>
+            <View>
+                <Input
+                    label="Bio"
+                    value={bio || ""}
+                    multiline = {true}
+                    numberOfLines={3}
+                    onChangeText={(text) => setBio(text)}
+                    autoCompleteType={undefined}/>
+            </View>
+            <View style={styles.mt20}>
                 <Button
                 title={loading ? "Loading ..." : "Update"}
-                onPress={() => updateProfile({ name: name, bio: bio })}
+                onPress={() => updateProfile()}
                 disabled={loading}
                 />
             </View>
-
-            <View style={styles.verticallySpaced}>
+            <View>
                 <Button title="Sign Out" onPress={() => supabase.auth.signOut()} />
             </View>
         </ScrollView>
@@ -248,11 +258,6 @@ export default function Account({navigation, route}: {navigation: any, route: an
 const styles = StyleSheet.create({
     container: {
       
-    },
-    verticallySpaced: {
-      paddingTop: 4,
-      paddingBottom: 4,
-      alignSelf: "stretch",
     },
     mt20: {
       marginTop: 20,
