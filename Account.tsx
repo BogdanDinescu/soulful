@@ -1,9 +1,10 @@
 import { ApiError, Session, User } from "@supabase/supabase-js";
 import React, { useEffect, useState } from "react";
-import { Alert, Button, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Alert, Button, ScrollView, StyleSheet, Text, Touchable, TouchableOpacity, View } from "react-native";
 import { Input } from "react-native-elements";
 import { maxNumberOfPhotos, supabase } from "./supabase";
 import * as ImagePicker from 'expo-image-picker';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import {decode} from 'base64-arraybuffer'
 import PhotoCarousel from "./PhotoCarousel";
 
@@ -12,6 +13,8 @@ export default function Account({navigation, route}: {navigation: any, route: an
     const [user, setUser] = useState<User|null>(null);
     const [name, setName] = useState("");
     const [bio, setBio] = useState("");
+    const [birthday, setBirthday] = useState<Date>(new Date(new Date().setFullYear(new Date().getFullYear() - 18)))
+    const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
     const [photos, setPhotos] = useState<string[]>(["", "", ""]);
 
     useEffect(() => {
@@ -19,7 +22,7 @@ export default function Account({navigation, route}: {navigation: any, route: an
         if (session) {
             setUser(session.user);
             if (user) {
-                //getProfile();
+                getProfile();
                 downloadPhotos();
             }
         }
@@ -35,7 +38,7 @@ export default function Account({navigation, route}: {navigation: any, route: an
 
             let {data, error, status} = await supabase
                 .from("profiles")
-                .select(`name, bio`)
+                .select('name, bio, birthday')
                 .eq("id", user.id)
                 .single();
 
@@ -44,8 +47,8 @@ export default function Account({navigation, route}: {navigation: any, route: an
             }
 
             if (data) {
-                setName(data.username);
-                setBio(data.website);
+                setName(data.name);
+                setBio(data.bio);
             }
         } catch (error) {
             Alert.alert((error as ApiError).message);
@@ -65,6 +68,7 @@ export default function Account({navigation, route}: {navigation: any, route: an
                 id: user.id,
                 name: name,
                 bio: bio,
+                birthday: birthday,
                 updated_at: new Date(),
             };
 
@@ -203,6 +207,28 @@ export default function Account({navigation, route}: {navigation: any, route: an
                     numberOfLines={3}
                     onChangeText={(text) => setBio(text)}
                     autoCompleteType={undefined}/>
+            </View>
+            <View>
+                <TouchableOpacity
+                    onPress={() => {setShowDatePicker(true)}}>
+                    <Input
+                        label="Birthday"
+                        value={birthday.toLocaleDateString()}
+                        autoCompleteType={undefined}
+                        disabled/>
+                </TouchableOpacity>
+                {showDatePicker && 
+                (<DateTimePicker
+                    value={birthday}
+                    mode={"date"}
+                    maximumDate={new Date(new Date().setFullYear(new Date().getFullYear() - 18))}
+                    onChange={(event) => {
+                        if (event.type ==='set' && event.nativeEvent.timestamp) {
+                            setBirthday(new Date(event.nativeEvent.timestamp))
+                        }
+                        setShowDatePicker(false)
+                    }}
+                />)}
             </View>
             <View style={[styles.verticallySpaced, styles.mt20]}>
                 <Button

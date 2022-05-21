@@ -1,50 +1,50 @@
 import { FontAwesome } from '@expo/vector-icons';
 import React, { useEffect, useRef, useState } from 'react';
-import { Image, Alert, StyleSheet, Text, View } from 'react-native';
+import { Image, Alert, StyleSheet, Text, View, Dimensions } from 'react-native';
 import Carousel from 'react-native-snap-carousel';
 
 export default function PhotoCarousel({photosUrls, uploadPhoto, removePhoto}: {photosUrls: Array<string>, uploadPhoto?: Function, removePhoto?: Function}) {
     
+    const { width: viewportWidth, height: viewportHeight } = Dimensions.get('window');
+
     const renderItem = ({item, index}: {item: any, index: number}) => {
         if (item === "") {
             return (
                 <View style={{
                     display: 'flex', 
                     alignItems:"center",
-                    paddingTop: 100,
-                    width:300,
-                    height:300
+                    paddingTop: 200,
+                    width: viewportWidth,
+                    height: 400
                     }}>
+                    {
+                    uploadPhoto?
                     <FontAwesome.Button 
                         name="plus"
                         style={{height: 50}}
-                        onPress={() => {
-                            if (typeof uploadPhoto !== 'undefined') {
-                                uploadPhoto(index)
-                            }
-                        }}>
+                        onPress={() => { uploadPhoto(index) }}>
                         Add image
-                    </FontAwesome.Button>
+                    </FontAwesome.Button>:<></>
+                    }
               </View>
             )
         } else {
             return (
                 <View>
+                    {
+                    removePhoto?
                     <FontAwesome.Button
                             name='remove'
                             style={{backgroundColor: "darkred"}}
                             onPress={
-                                () => {
-                                    if (typeof removePhoto !== 'undefined') {
-                                        removePhoto(index)
-                                    }
-                                }
+                                () => { removePhoto(index) }
                             }>
                             Remove this image
-                    </FontAwesome.Button>
+                    </FontAwesome.Button>:<></>
+                    }
                     <Image
                         source={{uri: item}}
-                        style={{width:300, height:300}}
+                        style={{width: viewportWidth, height: 400, resizeMode: 'contain'}}
                         />
                 </View>
             )
@@ -54,14 +54,14 @@ export default function PhotoCarousel({photosUrls, uploadPhoto, removePhoto}: {p
     const isCarousel = useRef(null);
 
     return (
-        <View style={{display: "flex", alignItems: "center"}}>
+        <View>
             <Carousel
                 layout={'default'}
                 ref={isCarousel}
                 data={photosUrls}
                 renderItem={renderItem}
-                sliderWidth={300}
-                itemWidth={300}
+                sliderWidth={viewportWidth}
+                itemWidth={viewportWidth}
                 enableMomentum={false}
                 enableSnap={true}
             />

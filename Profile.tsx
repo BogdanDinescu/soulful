@@ -2,6 +2,7 @@ import { maxNumberOfPhotos, supabase } from "./supabase";
 import PhotoCarousel from "./PhotoCarousel";
 import React, { useEffect, useState } from "react";
 import { Alert, View, ActivityIndicator} from "react-native";
+import { Text } from "react-native-elements";
 
 export default function Profile({navigation, route, userId}: {navigation:any, route:any, userId:string|null}) {
     const [photos, setPhotos] = useState<string[]>(["", "", ""]);
@@ -16,7 +17,6 @@ export default function Profile({navigation, route, userId}: {navigation:any, ro
         } else {
             Alert.alert("Error", "User does not exist")
         }
-        setLoading(false);
     }, [])
 
 
@@ -35,12 +35,9 @@ export default function Profile({navigation, route, userId}: {navigation:any, ro
             }
             if (data) {
                 const photoUrls = data.map(x => x.signedURL).filter(x => x);
-                if (photoUrls.length < maxNumberOfPhotos) {
-                    photoUrls.push("")
-                }
                 setPhotos(photoUrls);
             }
-
+            setLoading(false);
         } catch (error: any) {
             Alert.alert("Error downloading images", error.message)
         }
@@ -50,7 +47,7 @@ export default function Profile({navigation, route, userId}: {navigation:any, ro
         try {
             let {data, error, status} = await supabase
                 .from("profiles")
-                .select("name, bio")
+                .select("name, bio, birthday")
                 .eq("id", id)
                 .single();
             if (error) {
@@ -62,9 +59,35 @@ export default function Profile({navigation, route, userId}: {navigation:any, ro
         }
     }
 
+    function getAge(birthday: Date|string): number {
+        if (birthday === null || typeof birthday === 'undefined') {
+            return 0;
+        }
+        if (typeof birthday === 'string') {
+            birthday = new Date(birthday);
+        }
+        let today = new Date();
+        let age = today.getFullYear() - birthday.getFullYear();
+        let m = today.getMonth() - birthday.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birthday.getDate())) {
+           age--;
+        }
+        return age;
+    }
+
     return (
-        <View style={{}}>
-            { loading ? <ActivityIndicator/>: <PhotoCarousel photosUrls={photos}/> }
+        <View>
+            { loading ? <ActivityIndicator/>: 
+            <View>
+                <PhotoCarousel photosUrls={photos}/>
+                <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'center', marginTop: 5}}>
+                    <Text style={{fontSize: 20, fontWeight: 'bold'}}>{profile.name},</Text>
+                    <Text style={{fontSize: 20}}> {getAge(profile.birthday)}</Text>
+                </View>
+                <View style={{borderBottomColor: 'gray', borderBottomWidth: 1, marginVertical: 20}}/>
+                <Text style={{fontSize: 15, paddingHorizontal: 20}}>{profile.bio}</Text>
+            </View> 
+            }
         </View>
     )
 }
