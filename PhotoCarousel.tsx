@@ -1,4 +1,4 @@
-import { FontAwesome } from '@expo/vector-icons';
+import { FontAwesome, Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useRef, useState } from 'react';
 import { Image, Alert, StyleSheet, Text, View, Dimensions } from 'react-native';
 import Carousel from 'react-native-snap-carousel';
@@ -31,21 +31,18 @@ export default function PhotoCarousel({photosUrls, uploadPhoto, removePhoto}: {p
         } else {
             return (
                 <View>
-                    {
-                    removePhoto?
-                    <FontAwesome.Button
-                            name='remove'
-                            style={{backgroundColor: "darkred"}}
-                            onPress={
-                                () => { removePhoto(index) }
-                            }>
-                            Remove this image
-                    </FontAwesome.Button>:<></>
-                    }
                     <Image
                         source={{uri: item}}
                         style={{width: viewportWidth, height: 400, resizeMode: 'contain'}}
                         />
+                    {
+                    removePhoto?
+                    <Ionicons
+                        name='trash'
+                        size={50}
+                        style={{backgroundColor: "white", position: 'absolute', right: 10 , bottom: 10, borderRadius: 40}}
+                        onPress={() => { removePhoto(index) }}/>:<></>
+                    }
                 </View>
             )
         }

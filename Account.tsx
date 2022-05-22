@@ -1,6 +1,6 @@
 import { ApiError, Session, User } from "@supabase/supabase-js";
 import React, { useEffect, useState } from "react";
-import { Alert, Button, ScrollView, StyleSheet, Text, Touchable, TouchableOpacity, View } from "react-native";
+import { Alert, Button, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Input } from "react-native-elements";
 import { maxNumberOfPhotos, supabase } from "./supabase";
 import * as ImagePicker from 'expo-image-picker';
@@ -8,6 +8,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import {Picker} from '@react-native-picker/picker';
 import {decode} from 'base64-arraybuffer'
 import PhotoCarousel from "./PhotoCarousel";
+import { FontAwesome } from "@expo/vector-icons";
 
 export default function Account({navigation, route}: {navigation: any, route: any}) {
     const [loading, setLoading] = useState(false);
@@ -15,7 +16,7 @@ export default function Account({navigation, route}: {navigation: any, route: an
     const [name, setName] = useState("");
     const [bio, setBio] = useState("");
     const [birthday, setBirthday] = useState<Date>(new Date(new Date().setFullYear(new Date().getFullYear() - 18)));
-    const [sex, setSex] = useState<string>("");
+    const [sex, setSex] = useState<string>("M");
     const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
     const [photos, setPhotos] = useState<string[]>(["", "", ""]);
 
@@ -51,6 +52,8 @@ export default function Account({navigation, route}: {navigation: any, route: an
             if (data) {
                 setName(data.name);
                 setBio(data.bio);
+                setBirthday(new Date(data.birthday));
+                setSex(data.sex);
             }
         } catch (error) {
             Alert.alert((error as ApiError).message);
@@ -128,22 +131,32 @@ export default function Account({navigation, route}: {navigation: any, route: an
     async function removePhoto(number: number) {
         try {
             setLoading(true);
-            if (!user) {
-                throw new Error("No user");
-            }
-            const path: string = `pictures`;
-            const fileExt: string = 'jpg';
-            const filePath: string = `${user.id}/picture${number}.${fileExt}`;
-            const { data, error } = await supabase.storage.from(path).remove([filePath]);
-            if (error) {
-                throw error;
-            }
-            for (let i = number + 1; i < maxNumberOfPhotos; i++) {
-                const oldPath: string = `${user.id}/picture${i}.${fileExt}`;
-                const newPath: string = `${user.id}/picture${i-1}.${fileExt}`;
-                await supabase.storage.from(path).move(oldPath, newPath);
-            }
-            downloadPhotos();
+            Alert.alert(
+                'Confirm delete',
+                'Do you want to delete this?',
+                [
+                  {text: 'NO', style: 'cancel'},
+                  {text: 'YES', onPress: async () => {
+                    if (!user) {
+                        throw new Error("No user");
+                    }
+                    const path: string = `pictures`;
+                    const fileExt: string = 'jpg';
+                    const filePath: string = `${user.id}/picture${number}.${fileExt}`;
+                    const { error } = await supabase.storage.from(path).remove([filePath]);
+                    if (error) {
+                        throw error;
+                    }
+                    for (let i = number + 1; i < maxNumberOfPhotos; i++) {
+                        const oldPath: string = `${user.id}/picture${i}.${fileExt}`;
+                        const newPath: string = `${user.id}/picture${i-1}.${fileExt}`;
+                        await supabase.storage.from(path).move(oldPath, newPath);
+                    }
+                    downloadPhotos();
+                  }},
+                ]
+              );
+            
         } catch (error: any) {
             Alert.alert("Deleting failed", error.message);
         } finally {
@@ -156,7 +169,6 @@ export default function Account({navigation, route}: {navigation: any, route: an
             if (!user) {
                 throw new Error("No user");
             }
-            const path: string = `pictures/${user.id}`;
             const array:Array<string> = [];
             for (let i = 0; i < maxNumberOfPhotos; i++) {
                 array.push(`${user.id}/picture${i}.jpg`)
@@ -182,15 +194,15 @@ export default function Account({navigation, route}: {navigation: any, route: an
 
     return(
         <ScrollView style={styles.container}>
-            <Text style={{fontWeight: "bold", fontSize: 20, textAlign: "center"}}>
-                My Profile
-            </Text>
-            <Button
-                title="Preview"
-                onPress={() =>
-                    navigation.navigate('Profile', {id: user?.id})
-                }
-            />
+            <View style={{margin: 10}}>
+                <FontAwesome.Button
+                    name="upload"
+                    style={{height: 40}}
+                    onPress={() => updateProfile()}
+                    disabled={loading}>
+                    {loading ? "Loading ..." : "Update"}
+                </FontAwesome.Button>
+            </View>
             <PhotoCarousel photosUrls={photos} uploadPhoto={uploadPhoto} removePhoto={removePhoto}/>
             <View style={styles.mt20}>
                 <Input label="Email" value={user?.email} autoCompleteType={undefined} disabled/>
@@ -205,7 +217,7 @@ export default function Account({navigation, route}: {navigation: any, route: an
             <View>
                 <Picker
                     selectedValue={sex}
-                    onValueChange={(value:string, index:number)=> {setSex(value)}}>
+                    onValueChange={(value:string)=> {setSex(value)}}>
                     <Picker.Item label="Male" value="M" />
                     <Picker.Item label="Female" value="F" />
                 </Picker>
@@ -240,16 +252,6 @@ export default function Account({navigation, route}: {navigation: any, route: an
                     numberOfLines={3}
                     onChangeText={(text) => setBio(text)}
                     autoCompleteType={undefined}/>
-            </View>
-            <View style={styles.mt20}>
-                <Button
-                title={loading ? "Loading ..." : "Update"}
-                onPress={() => updateProfile()}
-                disabled={loading}
-                />
-            </View>
-            <View>
-                <Button title="Sign Out" onPress={() => supabase.auth.signOut()} />
             </View>
         </ScrollView>
     );

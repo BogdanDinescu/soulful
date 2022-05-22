@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Image, Alert, Text, View } from 'react-native';
 
-export default function Chats() {
+export default function ExploreTab() {
     return (
         <View>
-            <Text>Chats!</Text>
+            <Text>Explore!</Text>
         </View>
     )
 }
