@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Image, Alert, Text, View } from 'react-native';
+import { Image, Alert, Text, View, Dimensions } from 'react-native';
 import Carousel from 'react-native-snap-carousel';
 import { supabase } from './supabase';
 import * as Location from 'expo-location';
@@ -12,7 +12,8 @@ export default function ExploreTab({navigation, route}: {navigation: any, route:
     const [location, setLocation] = useState<Location.LocationObject|null>(null);
     const [user, setUser] = useState<User|null>();
     const [userGeoHash, setUserGeoHash] = useState<string>("");
-
+    const { width: viewportWidth, height: viewportHeight } = Dimensions.get('window');
+    
     useEffect(() => {
         const session: Session = route.params.session;
         if (session) {
@@ -56,6 +57,25 @@ export default function ExploreTab({navigation, route}: {navigation: any, route:
         }
     }
 
+
+    async function downloadPhotos(profiles: Array<any>) {
+        try {
+            const array: Array<string> = [];
+            for (const profile of profiles) {
+                array.push(`${profile.id}/picture0.jpg`);
+            }
+            const {data, error} = await supabase.storage
+                .from("pictures")
+                .createSignedUrls(array, 60);
+            if (error) {
+                throw error;
+            }
+            return data;
+        } catch (error: any) {
+            Alert.alert("Error downloading images", error.message)
+        }
+    }
+
     async function getUsersIds(geohash: string) {
         const ns = Geohash.neighbours(geohash);
         const arr: string[] = [ns.e, ns.n, ns.ne, ns.nw, ns.s, ns.se, ns.sw, ns.w, geohash]
@@ -67,14 +87,43 @@ export default function ExploreTab({navigation, route}: {navigation: any, route:
             Alert.alert("Error getting profiles", error?.message)
             return;
         }
+        const photo_urls = await downloadPhotos(data);
+        if (photo_urls !== null && typeof photo_urls !== 'undefined') {
+            for (let i=0; i<data.length; i++) {
+                data[i].photo = photo_urls[i].signedURL;
+            }
+        }
         console.log(data);
         setUsersList(data);
     }
     
+    function getAge(birthday: Date|string): number {
+        if (birthday === null || typeof birthday === 'undefined') {
+            return 0;
+        }
+        if (typeof birthday === 'string') {
+            birthday = new Date(birthday);
+        }
+        let today = new Date();
+        let age = today.getFullYear() - birthday.getFullYear();
+        let m = today.getMonth() - birthday.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birthday.getDate())) {
+           age--;
+        }
+        return age;
+    }
+
     const renderItem = ({item, index}: {item: any, index: number}) => {
         return (
-            <View>
-                <Text>{item}</Text>
+            <View style={{width: '80%', marginLeft: '5%', backgroundColor: 'lightgray', borderColor: 'darkgray', borderWidth: 2, borderRadius: 10}}>
+                <Image
+                    source={{uri: item.photo}}
+                    style={{width: '100%', height: 400, resizeMode: 'contain'}}
+                    />
+                <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'center', marginVertical: 10}}>
+                    <Text style={{fontSize: 20, fontWeight: 'bold'}}>{item.name},</Text>
+                    <Text style={{fontSize: 20}}> {getAge(item.birthday)}</Text>
+                </View>
             </View>
         )
     }
@@ -90,14 +139,14 @@ export default function ExploreTab({navigation, route}: {navigation: any, route:
       }
 
     return (
-        <View>
+        <View style={{flex: 1, alignContent: 'center', justifyContent: 'center', padding: 20}}>
             <Carousel
                 layout={'tinder'}
                 ref={isCarousel}
                 data={usersList}
                 renderItem={renderItem}
-                sliderWidth={500}
-                itemWidth={500}
+                sliderWidth={viewportWidth}
+                itemWidth={viewportWidth}
                 enableMomentum={false}
                 enableSnap={true}
             />
