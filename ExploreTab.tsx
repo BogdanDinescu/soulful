@@ -2,7 +2,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Explore from "./Explore";
 import Profile from "./Profile";
 
-export default function SettingsTab({navigation, route}: {navigation: any, route: any}) {
+export default function ExploreTab({navigation, route}: {navigation: any, route: any}) {
 
     const Stack = createNativeStackNavigator();
 

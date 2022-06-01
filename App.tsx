@@ -77,9 +77,11 @@ export default function App() {
               component={Explore} 
               options={{headerShown: false }}
               initialParams={{session: session}}/>
-            <Tab.Screen name="ChatsTab" 
+            <Tab.Screen
+              name="ChatsTab" 
               component={Chats} 
-              options={{ tabBarLabel: 'Chats', headerShown: false }}/>
+              options={{ tabBarLabel: 'Chats', headerShown: false }}
+              initialParams={{session: session}}/>
             
           </Tab.Navigator>:
           <Stack.Navigator>
