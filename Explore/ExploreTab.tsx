@@ -1,6 +1,6 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Explore from "./Explore";
-import Profile from "./Profile";
+import Profile from "../Profile";
 
 export default function ExploreTab({navigation, route}: {navigation: any, route: any}) {
 

@@ -2,12 +2,12 @@ import { ApiError, Session, User } from "@supabase/supabase-js";
 import React, { useEffect, useState } from "react";
 import { Alert, Button, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Input } from "react-native-elements";
-import { maxNumberOfPhotos, supabase } from "./supabase";
+import { maxNumberOfPhotos, supabase } from "../supabase";
 import * as ImagePicker from 'expo-image-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import {Picker} from '@react-native-picker/picker';
 import {decode} from 'base64-arraybuffer'
-import PhotoCarousel from "./PhotoCarousel";
+import PhotoCarousel from "../PhotoCarousel";
 import { FontAwesome } from "@expo/vector-icons";
 
 export default function Account({navigation, route}: {navigation: any, route: any}) {

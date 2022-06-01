@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { Image, Alert, Text, View, StyleSheet } from 'react-native';
+import React, {  } from 'react';
+import { View, StyleSheet } from 'react-native';
 import { Button } from 'react-native-elements';
-import { supabase } from './supabase';
+import { supabase } from '../supabase';
 
 export default function Settings({navigation, route}: {navigation: any, route: any}) {
     return (

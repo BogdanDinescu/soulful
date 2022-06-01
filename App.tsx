@@ -6,12 +6,10 @@ import { useFonts } from 'expo-font';
 import React, { useEffect, useState } from 'react';
 import { supabase } from './supabase';
 import { Session } from '@supabase/supabase-js';
-import Account from './Account';
 import Auth from './Auth';
-import Profile from './Profile';
-import SettingsTab from './SettingsTab';
-import Explore from './ExploreTab';
-import Chats from './ChatsTab';
+import SettingsTab from './Settings/SettingsTab';
+import Explore from './Explore/ExploreTab';
+import Chats from './Chats/ChatsTab';
 import 'react-native-url-polyfill/auto';
 import { ActivityIndicator, View } from 'react-native';
 

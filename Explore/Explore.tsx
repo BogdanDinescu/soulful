@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Image, Alert, Text, View, Dimensions, ActivityIndicator } from 'react-native';
 import Carousel from 'react-native-snap-carousel';
-import { supabase } from './supabase';
+import { supabase } from '../supabase';
 import * as Location from 'expo-location';
 import Geohash from 'latlon-geohash';
 import { Session, User } from '@supabase/supabase-js';
