@@ -53,6 +53,7 @@ export default function Profile({navigation, route}: {navigation:any, route:any}
                 throw error;
             }
             setProfile(data);
+            navigation.setOptions({headerTitle: `${data.name}'s profile`})
         } catch (error:any) {
             Alert.alert("Error downloading profile", error.message);
         }

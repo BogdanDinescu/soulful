@@ -75,7 +75,7 @@ export default function App() {
               initialParams={{session: session}}/>
             <Tab.Screen name="ExploreTab" 
               component={Explore} 
-              options={{ tabBarLabel: 'Home', headerTitle: 'soulful', headerTitleAlign: 'center', headerTitleStyle: {fontFamily: 'honeyNotes', fontSize: 40}}}
+              options={{headerShown: false }}
               initialParams={{session: session}}/>
             <Tab.Screen name="ChatsTab" 
               component={Chats} 

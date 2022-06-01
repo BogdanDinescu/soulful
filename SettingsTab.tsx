@@ -13,9 +13,22 @@ export default function SettingsTab({navigation, route}: {navigation: any, route
 
     return (
         <Stack.Navigator>
-            <Stack.Screen name="Settings" component={Settings} initialParams={{session: route.params.session}}></Stack.Screen>
-            <Stack.Screen name="Account" component={Account}/>
-            <Stack.Screen name="Profile" component={Profile}/>
+            <Stack.Screen
+                name="Settings"
+                component={Settings}
+                options={{headerTitle: 'settings', headerTitleAlign: 'center', headerTitleStyle: {fontFamily: 'honeyNotes', fontSize: 40}}}
+                initialParams={{session: route.params.session}}
+            />
+            <Stack.Screen
+                name="Account"
+                options={{headerTitle: 'edit profile', headerTitleAlign: 'center', headerTitleStyle: {fontFamily: 'honeyNotes', fontSize: 40}}}
+                component={Account}
+            />
+            <Stack.Screen
+                name="Profile"
+                options={{headerTitle: 'soulful', headerTitleAlign: 'center', headerTitleStyle: {fontFamily: 'honeyNotes', fontSize: 40}}}
+                component={Profile}
+            />
         </Stack.Navigator>
     )
 }
