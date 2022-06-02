@@ -89,8 +89,12 @@ export default function Chats({navigation, route}: {navigation: any, route: any}
     }
 
     return (
+        usersList.length?
         <View>
             <FlatList data={usersList} renderItem={itemList} keyExtractor={item => item.id}/>
+        </View>:
+        <View style={{marginTop: 150}}>
+            <Text style={{textAlign: 'center'}}>No mathes yet</Text>
         </View>
     )
 }
