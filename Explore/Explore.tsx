@@ -58,7 +58,6 @@ export default function ExploreTab({navigation, route}: {navigation: any, route:
         }
     }
 
-
     async function downloadPhotos(profiles: Array<any>) {
         try {
             const array: Array<string> = [];
@@ -78,12 +77,16 @@ export default function ExploreTab({navigation, route}: {navigation: any, route:
     }
 
     async function getUsersIds(geohash: string) {
+        if (user === null || typeof user === 'undefined') {
+            throw new Error("Current user not found");
+        }
         const ns = Geohash.neighbours(geohash);
         const arr: string[] = [ns.e, ns.n, ns.ne, ns.nw, ns.s, ns.se, ns.sw, ns.w, geohash]
         let {data, error} = await supabase
                 .from("profiles")
                 .select('id, name, birthday')
                 .in('geohash', arr)
+                .neq('id', user.id)
         if (error || !data) {
             Alert.alert("Error getting profiles", error?.message)
             return;
@@ -136,16 +139,23 @@ export default function ExploreTab({navigation, route}: {navigation: any, route:
             if (respectiveUser === null || typeof respectiveUser === 'undefined') {
                 throw new Error("Respective user not found");
             }
-            respectiveUser.id
-            const responseRow = {
-                id: user.id,
-                to: respectiveUser.id,
-                response: response
-                
+            let responseRow: any;
+            if (user.id < respectiveUser.id) {
+                responseRow = {
+                    id1: user.id,
+                    id2: respectiveUser.id,
+                    response1: response
+                }
+            } else {
+                responseRow = {
+                    id1: respectiveUser.id,
+                    id2: user.id,
+                    response2: response
+                }
             }
             const {error} = await supabase
                 .from("responses")
-                .upsert(responseRow);
+                .upsert(responseRow, {returning: 'minimal'});
             if (error)
                 throw error;
             carouselRef.snapToNext();   
