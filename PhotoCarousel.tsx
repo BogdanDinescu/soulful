@@ -19,8 +19,9 @@ export default function PhotoCarousel({photosUrls, uploadPhoto, removePhoto}: {p
                     }}>
                     {
                     uploadPhoto?
-                    <FontAwesome.Button 
+                    <FontAwesome.Button
                         name="plus"
+                        backgroundColor="dodgerblue"
                         style={{height: 50}}
                         onPress={() => { uploadPhoto(index) }}>
                         Add image

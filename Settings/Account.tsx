@@ -9,6 +9,7 @@ import {Picker} from '@react-native-picker/picker';
 import {decode} from 'base64-arraybuffer'
 import PhotoCarousel from "../PhotoCarousel";
 import { FontAwesome } from "@expo/vector-icons";
+import { useTheme } from "@react-navigation/native";
 
 export default function Account({navigation, route}: {navigation: any, route: any}) {
     const [loading, setLoading] = useState(false);
@@ -19,6 +20,7 @@ export default function Account({navigation, route}: {navigation: any, route: an
     const [sex, setSex] = useState<string>("M");
     const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
     const [photos, setPhotos] = useState<string[]>(["", "", ""]);
+    const colors = useTheme();
 
     useEffect(() => {
         const session: Session = route.params.session;
@@ -193,10 +195,11 @@ export default function Account({navigation, route}: {navigation: any, route: an
     }
 
     return(
-        <ScrollView style={styles.container}>
+        <ScrollView>
             <View style={{margin: 10}}>
                 <FontAwesome.Button
                     name="upload"
+                    backgroundColor="dodgerblue"
                     style={{height: 40}}
                     onPress={() => updateProfile()}
                     disabled={loading}>
@@ -204,11 +207,12 @@ export default function Account({navigation, route}: {navigation: any, route: an
                 </FontAwesome.Button>
             </View>
             <PhotoCarousel photosUrls={photos} uploadPhoto={uploadPhoto} removePhoto={removePhoto}/>
-            <View style={styles.mt20}>
-                <Input label="Email" value={user?.email} autoCompleteType={undefined} disabled/>
+            <View style={{marginTop: 20}}>
+                <Input style={{color: colors.colors.text}} label="Email" value={user?.email} autoCompleteType={undefined} disabled/>
             </View>
             <View>
                 <Input
+                    style={{color: colors.colors.text}}
                     label="Name"
                     value={name || ""}
                     onChangeText={(text) => setName(text)}
@@ -216,6 +220,7 @@ export default function Account({navigation, route}: {navigation: any, route: an
             </View>
             <View>
                 <Picker
+                    style={{color: colors.colors.text}}
                     selectedValue={sex}
                     onValueChange={(value:string)=> {setSex(value)}}>
                     <Picker.Item label="Male" value="M" />
@@ -226,6 +231,7 @@ export default function Account({navigation, route}: {navigation: any, route: an
                 <TouchableOpacity
                     onPress={() => {setShowDatePicker(true)}}>
                     <Input
+                        style={{color: colors.colors.text}}
                         label="Birthday"
                         value={birthday.toLocaleDateString()}
                         autoCompleteType={undefined}
@@ -246,6 +252,7 @@ export default function Account({navigation, route}: {navigation: any, route: an
             </View>
             <View>
                 <Input
+                    style={{color: colors.colors.text}}
                     label="Bio"
                     value={bio || ""}
                     multiline = {true}
@@ -256,13 +263,4 @@ export default function Account({navigation, route}: {navigation: any, route: an
         </ScrollView>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-      
-    },
-    mt20: {
-      marginTop: 20,
-    },
-});
 

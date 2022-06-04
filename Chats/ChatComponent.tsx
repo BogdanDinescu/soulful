@@ -1,5 +1,6 @@
 import { FontAwesome } from "@expo/vector-icons";
 import { Chat, defaultTheme, MessageType } from "@flyerhq/react-native-chat-ui";
+import { useTheme } from "@react-navigation/native";
 import { RealtimeSubscription, SupabaseRealtimePayload } from "@supabase/supabase-js";
 import React, { useEffect, useRef, useState } from "react";
 import { View, ActivityIndicator, Alert } from "react-native";
@@ -13,9 +14,9 @@ export default function ChatComponent({navigation, route}: {navigation:any, rout
     const messagesRef = useRef<MessageType.Any[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [subscription, setSubscription] = useState<RealtimeSubscription|null>(null);
+    const colors = useTheme();
 
     useEffect(() => {
-        console.log("effect")
         if (otherUser === null) {
             setOtherUser(route.params.otherUser);
         }
@@ -135,7 +136,7 @@ export default function ChatComponent({navigation, route}: {navigation:any, rout
         <View style={{height: "100%"}}>
             <FontAwesome.Button
                 style={{margin: 5}}
-                backgroundColor={"grey"}
+                backgroundColor="dodgerblue"
                 name='info'
                 onPress={() => {navigation.navigate('Profile', {id: otherUser.id})}}>
                 See profile
@@ -147,9 +148,10 @@ export default function ChatComponent({navigation, route}: {navigation:any, rout
                 theme={{
                     ...defaultTheme,
                     colors: {...defaultTheme.colors,
-                        inputBackground: 'grey',
+                        background: colors.colors.background,
+                        inputBackground: 'dodgerblue',
                         inputText: 'white',
-                        primary: 'deepskyblue',
+                        primary: 'dodgerblue',
                         secondary: 'lightcoral'},
                     fonts: {
                         ...defaultTheme.fonts,

@@ -1,4 +1,4 @@
-import { NavigationContainer } from '@react-navigation/native';
+import { DarkTheme, DefaultTheme, NavigationContainer, useTheme } from '@react-navigation/native';
 import { createNativeStackNavigator} from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -12,12 +12,15 @@ import Explore from './Explore/ExploreTab';
 import Chats from './Chats/ChatsTab';
 import 'react-native-url-polyfill/auto';
 import { ActivityIndicator, View } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { StatusBar } from 'expo-status-bar';
 
 export default function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [fontsLoaded] = useFonts({
     'honeyNotes': require('./assets/fonts/honeyNotes.ttf'),
   });
+  const [darkMode, setDarkMode] = useState<boolean>(false);
   const Stack = createNativeStackNavigator()
   const Tab = createBottomTabNavigator();
 
@@ -26,7 +29,24 @@ export default function App() {
     supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
     });
-  }, [])
+  }, []);
+
+  useEffect(() =>{
+    getTheme();
+  }, [darkMode])
+
+  async function getTheme() {
+    try {
+      const value = await AsyncStorage.getItem('@darkMode')
+      if (value !== null && value !== 'false') {
+        setDarkMode(true);
+      } else {
+        setDarkMode(false);
+      }
+    } catch(e) {
+      setDarkMode(false);
+    }
+  }
 
   if (!fontsLoaded)  {
     return(
@@ -37,35 +57,35 @@ export default function App() {
   }
 
   return (
-      <NavigationContainer>
+      <NavigationContainer theme={darkMode ? DarkTheme : DefaultTheme}>
+        <StatusBar backgroundColor="dodgerblue"></StatusBar>
         {session?
           <Tab.Navigator initialRouteName='ExploreTab'
             screenOptions={({ route }) => ({
               tabBarIcon: ({ focused, color, size }) => {
+                const colors = useTheme();
                 if (route.name === 'SettingsTab') {
                   if (focused) {
-                    return <Ionicons name='settings' size={30}/>;
+                    return <Ionicons name='settings' size={30} color={colors.colors.text}/>;
                   } else {
-                    return <Ionicons name='settings-outline' size={30}/>;
+                    return <Ionicons name='settings-outline' size={30} color={colors.colors.text}/>;
                   }
                 }
                 if (route.name === 'ExploreTab') {
                   if (focused) {
-                    return <Ionicons name='compass' size={30}/>;
+                    return <Ionicons name='compass' size={30} color={colors.colors.text}/>;
                   } else {
-                    return <Ionicons name='compass-outline' size={30}/>;
+                    return <Ionicons name='compass-outline' size={30} color={colors.colors.text}/>;
                   }
                 }
                 if (route.name === 'ChatsTab') {
                   if (focused) {
-                    return <Ionicons name='chatbubble' size={30}/>;
+                    return <Ionicons name='chatbubble' size={30} color={colors.colors.text}/>;
                   } else {
-                    return <Ionicons name='chatbubble-outline' size={30}/>;
+                    return <Ionicons name='chatbubble-outline' size={30} color={colors.colors.text}/>;
                   }
                 }
               },
-              tabBarActiveTintColor: 'black',
-              tabBarInactiveTintColor: 'gray',
             })}>
             <Tab.Screen name="SettingsTab" 
               component={SettingsTab}

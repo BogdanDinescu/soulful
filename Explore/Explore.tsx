@@ -6,6 +6,7 @@ import * as Location from 'expo-location';
 import Geohash from 'latlon-geohash';
 import { Session, User } from '@supabase/supabase-js';
 import { FontAwesome, FontAwesome5 } from '@expo/vector-icons';
+import { useTheme } from '@react-navigation/native';
 
 export default function ExploreTab({navigation, route}: {navigation: any, route: any}) {
     const [usersList, setUsersList] = useState<Array<any>>([]);
@@ -13,6 +14,7 @@ export default function ExploreTab({navigation, route}: {navigation: any, route:
     const [location, setLocation] = useState<Location.LocationObject|null>(null);
     const [user, setUser] = useState<User|null>();
     const { width: viewportWidth, height: viewportHeight } = Dimensions.get('window');
+    const colors = useTheme();
     
     useEffect(() => {
         const session: Session = route.params.session;
@@ -204,7 +206,7 @@ export default function ExploreTab({navigation, route}: {navigation: any, route:
             />
             <FontAwesome.Button
                 style={{margin: 5}}
-                backgroundColor={"grey"}
+                backgroundColor={"dodgerblue"}
                 name='info'
                 onPress={() => {navigation.navigate('Profile', {id: getRespectiveUser().id})}}>
                 See full profile
@@ -214,7 +216,7 @@ export default function ExploreTab({navigation, route}: {navigation: any, route:
                     <FontAwesome5
                         name='thumbs-down'
                         size={50}
-                        style={{width: 55, height: 55}}
+                        style={{width: 55, height: 55, color: colors.colors.text}}
                         onPress={async () => { await buttonPress(0) }}/>
                     <Text style={{textAlign: 'center'}}>No</Text>
                 </View>
@@ -222,7 +224,7 @@ export default function ExploreTab({navigation, route}: {navigation: any, route:
                     <FontAwesome5
                         name='smile'
                         size={50}
-                        style={{width: 55, height: 55}}
+                        style={{width: 55, height: 55, color: colors.colors.text}}
                         onPress={async () => { await buttonPress(1) }}/>
                     <Text style={{textAlign: 'center'}}>Friend</Text>
                 </View>
@@ -230,7 +232,7 @@ export default function ExploreTab({navigation, route}: {navigation: any, route:
                     <FontAwesome5
                         name='kiss-wink-heart'
                         size={50}
-                        style={{width: 55, height: 55}}
+                        style={{width: 55, height: 55, color: colors.colors.text}}
                         onPress={async () => { await buttonPress(2) }}/>
                     <Text style={{textAlign: 'center'}}>Lover</Text>
                 </View>
@@ -238,7 +240,7 @@ export default function ExploreTab({navigation, route}: {navigation: any, route:
                     <FontAwesome5
                         name='grin-hearts'
                         size={50}
-                        style={{width: 55, height: 55}}
+                        style={{width: 55, height: 55, color: colors.colors.text}}
                         onPress={async () => { await buttonPress(3) }}/>
                     <Text style={{textAlign: 'center'}}>Soulmate</Text>
                 </View>

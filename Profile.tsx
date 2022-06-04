@@ -3,12 +3,14 @@ import PhotoCarousel from "./PhotoCarousel";
 import React, { useEffect, useState } from "react";
 import { Alert, View, ActivityIndicator} from "react-native";
 import { Text } from "react-native-elements";
+import { useTheme } from "@react-navigation/native";
 
 export default function Profile({navigation, route}: {navigation:any, route:any}) {
     const [photos, setPhotos] = useState<string[]>(["", "", ""]);
     const [profile, setProfile] = useState<any>({});
     const [loading, setLoading] = useState<boolean>(true);
     const [userId, setUserId] = useState<string|null>(null);
+    const colors = useTheme();
 
     useEffect(() => {
         setUserId(route.params.id);
@@ -21,7 +23,6 @@ export default function Profile({navigation, route}: {navigation:any, route:any}
 
     async function downloadPhotos(id: string) {
         try {
-            const path: string = `pictures/${id}`;
             const array:Array<string> = [];
             for (let i = 0; i < maxNumberOfPhotos; i++) {
                 array.push(`${id}/picture${i}.jpg`)
@@ -44,7 +45,7 @@ export default function Profile({navigation, route}: {navigation:any, route:any}
 
     async function downloadProfile(id: string) {
         try {
-            let {data, error, status} = await supabase
+            let {data, error} = await supabase
                 .from("profiles")
                 .select("name, bio, birthday")
                 .eq("id", id)
@@ -81,11 +82,11 @@ export default function Profile({navigation, route}: {navigation:any, route:any}
             <View>
                 <PhotoCarousel photosUrls={photos}/>
                 <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'center', marginTop: 5}}>
-                    <Text style={{fontSize: 20, fontWeight: 'bold'}}>{profile.name},</Text>
-                    <Text style={{fontSize: 20}}> {getAge(profile.birthday)}</Text>
+                    <Text style={{fontSize: 20, fontWeight: 'bold', color: colors.colors.text}}>{profile.name},</Text>
+                    <Text style={{fontSize: 20, color: colors.colors.text}}> {getAge(profile.birthday)}</Text>
                 </View>
                 <View style={{borderBottomColor: 'gray', borderBottomWidth: 1, marginVertical: 20}}/>
-                <Text style={{fontSize: 15, paddingHorizontal: 20}}>{profile.bio}</Text>
+                <Text style={{fontSize: 15, paddingHorizontal: 20, color: colors.colors.text}}>{profile.bio}</Text>
             </View> 
             }
         </View>

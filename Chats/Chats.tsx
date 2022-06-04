@@ -80,13 +80,16 @@ export default function Chats({navigation, route}: {navigation: any, route: any}
                     }}
                     android_ripple={{color: "white"}}
                     style={{
-                        backgroundColor: "lightgrey",
+                        backgroundColor: "dodgerblue",
                         margin: 8,
-                        padding: 5,
+                        padding: 10,
                         borderRadius: 20 
                     }}>
                     <Text
-                        style={{fontSize: 35}}
+                        style={{
+                            color: "white",
+                            fontSize: 35
+                        }}
                     >
                     {item.name}
                     </Text>
