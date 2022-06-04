@@ -1,6 +1,7 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import React, { useEffect, useState } from 'react';
-import Chat from './Chat';
+import React, {  } from 'react';
+import Profile from '../Profile';
+import ChatComponent from './ChatComponent';
 import Chats from './Chats';
 
 export default function ChatsTab({navigation, route}: {navigation: any, route: any}) {
@@ -16,9 +17,14 @@ export default function ChatsTab({navigation, route}: {navigation: any, route: a
                 initialParams={{session: route.params.session}}
             />
             <Stack.Screen
-                name="Chat"
-                component={Chat}
+                name="ChatComponent"
+                component={ChatComponent}
                 options={{headerTitle: 'chat', headerTitleAlign: 'center', headerTitleStyle: {fontFamily: 'honeyNotes', fontSize: 40}}}
+            />
+            <Stack.Screen
+                name="Profile"
+                options={{headerTitle: 'soulful', headerTitleAlign: 'center', headerTitleStyle: {fontFamily: 'honeyNotes', fontSize: 40}}}
+                component={Profile}
             />
         </Stack.Navigator>
     )

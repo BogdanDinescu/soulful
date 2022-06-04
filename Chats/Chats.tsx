@@ -1,12 +1,12 @@
-import { FontAwesome5 } from "@expo/vector-icons";
 import { User, Session } from "@supabase/supabase-js";
 import React, { useEffect, useState } from "react";
-import { Alert, Button, FlatList, Pressable, Text, View } from "react-native";
+import { Alert, FlatList, Pressable, Text, View } from "react-native";
 import { supabase } from "../supabase";
 
 export default function Chats({navigation, route}: {navigation: any, route: any}) {
     const [usersList, setUsersList] = useState<Array<any>>([]);
     const [user, setUser] = useState<User|null>();
+
     useEffect(() => {
         const session: Session = route.params.session;
         if (session) {
@@ -70,7 +70,14 @@ export default function Chats({navigation, route}: {navigation: any, route: any}
         return (
             <View>
                 <Pressable
-                    onPress={() => {}}
+                    onPress={() => {
+                        if(user !== null && typeof user !== 'undefined') {
+                            navigation.navigate('ChatComponent', {
+                                currentUser: {id: user.id},
+                                otherUser: {id: item.id, name: item.name}
+                            });
+                        }
+                    }}
                     android_ripple={{color: "white"}}
                     style={{
                         backgroundColor: "lightgrey",

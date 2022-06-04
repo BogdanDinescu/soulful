@@ -12,7 +12,6 @@ export default function ExploreTab({navigation, route}: {navigation: any, route:
     const [permissionStatus, setPermissionStatus] = useState<Location.PermissionStatus>(Location.PermissionStatus.UNDETERMINED);
     const [location, setLocation] = useState<Location.LocationObject|null>(null);
     const [user, setUser] = useState<User|null>();
-    const [userGeoHash, setUserGeoHash] = useState<string>("");
     const { width: viewportWidth, height: viewportHeight } = Dimensions.get('window');
     
     useEffect(() => {
