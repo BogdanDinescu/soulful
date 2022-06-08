@@ -12,6 +12,7 @@ export default function ExploreTab({navigation, route}: {navigation: any, route:
     const [usersList, setUsersList] = useState<Array<any>>([]);
     const [permissionStatus, setPermissionStatus] = useState<Location.PermissionStatus>(Location.PermissionStatus.UNDETERMINED);
     const [location, setLocation] = useState<Location.LocationObject|null>(null);
+    const [loading, setLoading] = useState<boolean>(true)
     const [user, setUser] = useState<User|null>();
     const { width: viewportWidth, height: viewportHeight } = Dimensions.get('window');
     const colors = useTheme();
@@ -55,13 +56,17 @@ export default function ExploreTab({navigation, route}: {navigation: any, route:
                 throw new Error("Location is undefined")
             }
         } catch (error:any) {
-            Alert.alert("Location not updated", error.message)
+            Alert.alert("Location not updated", error.message);
+            setLoading(false);
         }
     }
 
     async function downloadPhotos(profiles: Array<any>) {
         try {
             const array: Array<string> = [];
+            if (profiles == null || typeof profiles === 'undefined' || profiles.length == 0) {
+                throw Error("Profiles not provided");
+            }
             for (const profile of profiles) {
                 array.push(`${profile.id}/picture0.jpg`);
             }
@@ -78,27 +83,36 @@ export default function ExploreTab({navigation, route}: {navigation: any, route:
     }
 
     async function getUsersIds(geohash: string) {
-        if (user === null || typeof user === 'undefined') {
-            throw new Error("Current user not found");
-        }
-        const ns = Geohash.neighbours(geohash);
-        const arr: string[] = [ns.e, ns.n, ns.ne, ns.nw, ns.s, ns.se, ns.sw, ns.w, geohash]
-        let {data, error} = await supabase
-                .from("profiles")
-                .select('id, name, birthday')
-                .in('geohash', arr)
-                .neq('id', user.id)
-        if (error || !data) {
-            Alert.alert("Error getting profiles", error?.message)
-            return;
-        }
-        const photo_urls = await downloadPhotos(data);
-        if (photo_urls !== null && typeof photo_urls !== 'undefined') {
-            for (let i=0; i<data.length; i++) {
-                data[i].photo = photo_urls[i].signedURL;
+        try {
+            if (user === null || typeof user === 'undefined') {
+                throw new Error("Current user not found");
             }
+            const ns = Geohash.neighbours(geohash);
+            const arr: string[] = [ns.e, ns.n, ns.ne, ns.nw, ns.s, ns.se, ns.sw, ns.w, geohash]
+            let {data, error} = await supabase
+                    .from("profiles")
+                    .select('id, name, birthday')
+                    .in('geohash', arr)
+                    .neq('id', user.id)
+            if (error || !data) {
+                Alert.alert("Error getting profiles", error?.message)
+                setLoading(false);
+                return;
+            }
+            if (data !== null && data.length > 0) {
+                const photo_urls = await downloadPhotos(data);
+                if (photo_urls !== null && typeof photo_urls !== 'undefined') {
+                    for (let i=0; i<data.length; i++) {
+                        data[i].photo = photo_urls[i].signedURL;
+                    }
+                }
+                setUsersList(data);
+                setLoading(false);
+            }
+        } catch (error: any) {
+            Alert.alert("Error getting user ids", error.message);
+            setLoading(false);
         }
-        setUsersList(data);
     }
     
     function getAge(birthday: Date|string): number {
@@ -182,16 +196,30 @@ export default function ExploreTab({navigation, route}: {navigation: any, route:
 
     let carouselRef: Carousel<any> | null;
     
+
+    if (!location || loading) {
+        return (
+            <ActivityIndicator style={{padding: 100}} size={'large'}/>
+        )
+    }
+
     if (permissionStatus !== Location.PermissionStatus.GRANTED) {
         return (
           <View style={{padding: 100}}>
             <Text style={{textAlign: 'center'}}>Please enable location to continue</Text>
           </View>
         )
-      }
+    }
+
+    if (usersList == null || typeof usersList === 'undefined' || usersList.length == 0) {
+        return (
+            <View style={{padding: 100}}>
+                <Text style={{textAlign: 'center'}}>No one new in your area</Text>
+            </View>
+        )
+    }
 
     return (
-        location?
         <View style={{flex: 1, alignContent: 'center', padding: 20}}>
             <Carousel
                 layout={'tinder'}
@@ -245,6 +273,6 @@ export default function ExploreTab({navigation, route}: {navigation: any, route:
                     <Text style={{textAlign: 'center'}}>Soulmate</Text>
                 </View>
             </View>
-        </View>:<ActivityIndicator style={{padding: 100}} size={'large'}/>
+        </View>
     )
 }
