@@ -1,11 +1,16 @@
+import { FontAwesome } from "@expo/vector-icons";
+import { useTheme } from "@react-navigation/native";
 import { User, Session } from "@supabase/supabase-js";
 import React, { useEffect, useState } from "react";
-import { Alert, FlatList, Pressable, Text, View } from "react-native";
+import { ActivityIndicator, Alert, FlatList, Pressable, Text, View } from "react-native";
 import { supabase } from "../supabase";
 
 export default function Chats({navigation, route}: {navigation: any, route: any}) {
     const [usersList, setUsersList] = useState<Array<any>>([]);
     const [user, setUser] = useState<User|null>();
+    const [loading, setLoading] = useState<boolean>(true);
+    const [buttonLoading, setButtonLoading] = useState(true);
+    const colors = useTheme();
 
     useEffect(() => {
         const session: Session = route.params.session;
@@ -44,6 +49,7 @@ export default function Chats({navigation, route}: {navigation: any, route: any}
 
     async function findUsers() {
         try {
+            setButtonLoading(true);
             if (!user) {
                 throw new Error("No user");
             }
@@ -61,8 +67,13 @@ export default function Chats({navigation, route}: {navigation: any, route: any}
                 });
             const result = await getUserNames(ids);
             setUsersList(result);
+            setLoading(false);
+            setButtonLoading(false);
+            console.log("gata")
         } catch(error: any) {
             Alert.alert("Error getting users", error.message);
+            setLoading(false);
+            setButtonLoading(false);
         }
     }
 
@@ -81,7 +92,7 @@ export default function Chats({navigation, route}: {navigation: any, route: any}
                     android_ripple={{color: "white"}}
                     style={{
                         backgroundColor: "dodgerblue",
-                        margin: 8,
+                        marginTop: 10,
                         padding: 10,
                         borderRadius: 20 
                     }}>
@@ -98,13 +109,38 @@ export default function Chats({navigation, route}: {navigation: any, route: any}
         )
     }
 
+    if (loading) {
+        return (
+            <ActivityIndicator style={{padding: 100}} size={'large'}/>
+        )
+    }
+
+    if (usersList === null || typeof usersList === 'undefined' || usersList.length == 0) {
+        return (
+            <View>
+                <FontAwesome.Button
+                    style={{margin: 5}}
+                    backgroundColor={"dodgerblue"}
+                    name='refresh'
+                    onPress={() => {findUsers()}}
+                    disabled={buttonLoading}>
+                    Refresh list
+                </FontAwesome.Button>
+                <Text style={{textAlign: 'center', color: colors.colors.text}}>No mathes yet</Text>
+            </View>
+        )
+    }
+
     return (
-        usersList.length?
         <View>
+            <FontAwesome.Button
+                style={{margin: 5}}
+                backgroundColor={"dodgerblue"}
+                name='refresh'
+                onPress={() => {findUsers()}}>
+                Refresh list
+            </FontAwesome.Button>
             <FlatList data={usersList} renderItem={itemList} keyExtractor={item => item.id}/>
-        </View>:
-        <View style={{marginTop: 150}}>
-            <Text style={{textAlign: 'center'}}>No mathes yet</Text>
         </View>
     )
 }

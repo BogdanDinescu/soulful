@@ -168,11 +168,18 @@ export default function ExploreTab({navigation, route}: {navigation: any, route:
                     response2: response
                 }
             }
-            const {error} = await supabase
+            const {data, error} = await supabase
                 .from("responses")
-                .upsert(responseRow, {returning: 'minimal'});
-            if (error)
+                .upsert(responseRow, {returning: 'representation'});
+            if (error) {
                 throw error;
+            }
+            console.log(data);
+            if (data && data[0] 
+                && data[0].response1 && data[0].response2 
+                && data[0].response1 === data[0].response2) {
+                Alert.alert("It's a match", "Got to chats");
+            }
             carouselRef.snapToNext();   
         } catch (error: any) {
             Alert.alert("Could not send response", error.message);
