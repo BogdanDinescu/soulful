@@ -1,12 +1,15 @@
 import { supabase } from "./supabase";
 import { Alert, StyleSheet, Text, View} from 'react-native';
 import React, { useState } from "react";
-import { Button, Input } from 'react-native-elements'
+import { Button, colors, Input } from 'react-native-elements'
+import { useTheme } from "@react-navigation/native";
+import { FontAwesome } from "@expo/vector-icons";
 
 export default function Auth() {
-    const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
-    const [loading, setLoading] = useState(false)
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false);
+    const colors = useTheme();
 
     async function signInWithEmail() {
         setLoading(true)
@@ -32,10 +35,20 @@ export default function Auth() {
         setLoading(false)
       }
 
+      async function signInWithFacebook() {
+        setLoading(true);
+        const { user, session, error } = await supabase.auth.signIn({
+          provider: 'facebook',
+        });
+        if (error) Alert.alert("Sign up failed",error.message)
+        setLoading(false);
+      }
+
       return (
-        <View style={styles.container}>
+        <View style={[styles.container, {backgroundColor: colors.colors.background}]}>
             <View style={[styles.verticallySpaced, styles.mt20]}>
                 <Input
+                      style={{color: colors.colors.text}}
                       label="Email"
                       leftIcon={{ type: 'font-awesome', name: 'envelope' }}
                       onChangeText={(text) => setEmail(text)}
@@ -46,6 +59,7 @@ export default function Auth() {
             </View>
             <View style={styles.verticallySpaced}>
                 <Input
+                      style={{color: colors.colors.text}}
                       label="Password"
                       leftIcon={{ type: 'font-awesome', name: 'lock' }}
                       onChangeText={(text) => setPassword(text)}
@@ -61,6 +75,16 @@ export default function Auth() {
             <View style={styles.verticallySpaced}>
                 <Button title="Sign up" disabled={loading} onPress={() => signUpWithEmail()}/>
             </View>
+            <View style={{width: "100%", marginTop: 5}}>
+              <FontAwesome.Button
+                  style={{margin: 5, width: "100%"}}
+                  backgroundColor={"dodgerblue"}
+                  name='facebook'
+                  disabled={loading}
+                  onPress={() => {signInWithFacebook()}}>
+                  Sign in with Facebook
+              </FontAwesome.Button>
+            </View>
         </View>
       );
 }
@@ -68,7 +92,6 @@ export default function Auth() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff',
         alignItems: 'center',
         justifyContent: 'center',
       },
