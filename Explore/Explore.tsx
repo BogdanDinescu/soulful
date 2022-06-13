@@ -7,6 +7,7 @@ import Geohash from 'latlon-geohash';
 import { Session, User } from '@supabase/supabase-js';
 import { FontAwesome, FontAwesome5 } from '@expo/vector-icons';
 import { useTheme } from '@react-navigation/native';
+import Animated, { color, useAnimatedStyle, useSharedValue, withSequence, withSpring, withTiming } from 'react-native-reanimated';
 
 export default function ExploreTab({navigation, route}: {navigation: any, route: any}) {
     const [usersList, setUsersList] = useState<Array<any>>([]);
@@ -16,7 +17,32 @@ export default function ExploreTab({navigation, route}: {navigation: any, route:
     const [user, setUser] = useState<User|null>();
     const { width: viewportWidth, height: viewportHeight } = Dimensions.get('window');
     const colors = useTheme();
-    
+    const rotation1 = useSharedValue<number>(0);
+    const animatedStyles1 = useAnimatedStyle(() => {
+        return {
+            transform: [{ rotateZ: withSpring(`${rotation1.value}deg`) }]
+        };
+    });
+    const rotation2 = useSharedValue<number>(0);
+    const animatedStyles2 = useAnimatedStyle(() => {
+        return {
+            transform: [{ rotateZ: withSpring(`${rotation2.value}deg`) }]
+        };
+    });
+    const rotation3 = useSharedValue<number>(0);
+    const animatedStyles3 = useAnimatedStyle(() => {
+        return {
+            transform: [{ rotateZ: withSpring(`${rotation3.value}deg`) }]
+        };
+    });
+    const rotation4 = useSharedValue<number>(0);
+    const animatedStyles4 = useAnimatedStyle(() => {
+        return {
+            transform: [{ rotateZ: withSpring(`${rotation4.value}deg`) }]
+        };
+    });
+
+
     useEffect(() => {
         const session: Session = route.params.session;
         if (session) {
@@ -142,6 +168,32 @@ export default function ExploreTab({navigation, route}: {navigation: any, route:
         return respectiveUser;
     }
 
+    function animateRotate(n: number) {
+        switch(n) {
+            case 0:
+                rotation1.value = withSequence(
+                    withTiming(360, { duration: 500 }),
+                    withTiming(0, { duration: 50 }));
+                break;
+            case 1:
+                rotation2.value = withSequence(
+                    withTiming(360, { duration: 500 }),
+                    withTiming(0, { duration: 50 }));
+                break;
+            case 2:
+                rotation3.value = withSequence(
+                    withTiming(360, { duration: 500 }),
+                    withTiming(0, { duration: 50 }));
+                break;
+            case 3:
+                rotation4.value = withSequence(
+                    withTiming(360, { duration: 500 }),
+                    withTiming(0, { duration: 50 }));
+                break;
+        }
+        
+    }
+
     async function buttonPress(response: number) {
         try {
             if (carouselRef === null || typeof carouselRef === 'undefined') {
@@ -168,6 +220,7 @@ export default function ExploreTab({navigation, route}: {navigation: any, route:
                     response2: response
                 }
             }
+            animateRotate(response)
             const {data, error} = await supabase
                 .from("responses")
                 .upsert(responseRow, {returning: 'representation'});
@@ -248,36 +301,44 @@ export default function ExploreTab({navigation, route}: {navigation: any, route:
             </FontAwesome.Button>
             <View style={{flex: 1, flexDirection: 'row', justifyContent: 'space-evenly', marginVertical: 20}}>
                 <View>
-                    <FontAwesome5
-                        name='thumbs-down'
-                        size={50}
-                        style={{width: 55, height: 55, color: colors.colors.text}}
-                        onPress={async () => { await buttonPress(0) }}/>
-                    <Text style={{textAlign: 'center'}}>No</Text>
+                    <Animated.View style={animatedStyles1}>
+                        <FontAwesome5
+                            name='thumbs-down'
+                            size={50}
+                            style={{width: 55, height: 55, color: colors.colors.text}}
+                            onPress={async () => { await buttonPress(0) }}/>
+                    </Animated.View>
+                    <Text style={{textAlign: 'center', color: colors.colors.text}}>No</Text>
                 </View>
                 <View>
-                    <FontAwesome5
-                        name='smile'
-                        size={50}
-                        style={{width: 55, height: 55, color: colors.colors.text}}
-                        onPress={async () => { await buttonPress(1) }}/>
-                    <Text style={{textAlign: 'center'}}>Friend</Text>
+                    <Animated.View style={animatedStyles2}>
+                        <FontAwesome5
+                            name='smile'
+                            size={50}
+                            style={{width: 55, height: 55, color: colors.colors.text}}
+                            onPress={async () => { await buttonPress(1) }}/>
+                    </Animated.View>
+                    <Text style={{textAlign: 'center', color: colors.colors.text}}>Friend</Text>
                 </View>
                 <View>
-                    <FontAwesome5
-                        name='kiss-wink-heart'
-                        size={50}
-                        style={{width: 55, height: 55, color: colors.colors.text}}
-                        onPress={async () => { await buttonPress(2) }}/>
-                    <Text style={{textAlign: 'center'}}>Lover</Text>
+                    <Animated.View style={animatedStyles3}>
+                        <FontAwesome5
+                            name='kiss-wink-heart'
+                            size={50}
+                            style={{width: 55, height: 55, color: colors.colors.text}}
+                            onPress={async () => { await buttonPress(2) }}/>
+                    </Animated.View>
+                    <Text style={{textAlign: 'center', color: colors.colors.text}}>Lover</Text>
                 </View>
                 <View>
-                    <FontAwesome5
-                        name='grin-hearts'
-                        size={50}
-                        style={{width: 55, height: 55, color: colors.colors.text}}
-                        onPress={async () => { await buttonPress(3) }}/>
-                    <Text style={{textAlign: 'center'}}>Soulmate</Text>
+                    <Animated.View style={animatedStyles4}>
+                        <FontAwesome5
+                            name='grin-hearts'
+                            size={50}
+                            style={{width: 55, height: 55, color: colors.colors.text}}
+                            onPress={async () => { await buttonPress(3) }}/>
+                    </Animated.View>
+                    <Text style={{textAlign: 'center', color: colors.colors.text}}>Soulmate</Text>
                 </View>
             </View>
         </View>
